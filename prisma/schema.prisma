@@ -13,14 +13,43 @@ datasource db {
 model User {
   id String @id @default(uuid()) @db.Uuid
 
-  firstName String @db.VarChar(255)
+  firstName  String  @db.VarChar(255)
   middleName String? @db.VarChar(255)
-  lastName String @db.VarChar(255)
+  lastName   String  @db.VarChar(255)
+  role       String? @db.VarChar(255)
 
   telegram String? @db.VarChar(255)
 
-  email String @unique @db.VarChar(255)
-  password String @db.VarChar(255)
+  email             String    @unique @db.VarChar(255)
+  email_verified_at DateTime? @db.Timestamptz()
+  password          String    @db.VarChar(255)
 
   createdAt DateTime? @default(now()) @db.Timestamptz()
+  realties  Realty[]
+}
+
+model Realty {
+  id            String  @id @default(uuid()) @db.Uuid
+  categoryId    String  @db.Uuid
+  status        String  @db.VarChar(255)
+  type          String  @db.VarChar(255)
+  description   String?
+  ownerId       String  @db.Uuid
+  mainPhoto     String  @db.VarChar(255)
+  price         Decimal @db.Money
+  guestCount    Int
+  bathroomCount Int
+  location      Json
+  title         String  @db.VarChar()
+
+  owner    User           @relation(fields: [ownerId], references: [id])
+  category RealtyCategory @relation(fields: [categoryId], references: [id])
+}
+
+model RealtyCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(255)
+  icon        String?  @db.VarChar(255)
+  description String
+  realties    Realty[]
 }
