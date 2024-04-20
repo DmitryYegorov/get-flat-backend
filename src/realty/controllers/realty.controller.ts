@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateRealtyDto } from '../dto/create-realty.dto';
 import { RealtyService } from '../services/realty.service';
 import { AuthGuard } from 'src/users/auth/auth.guard';
@@ -12,5 +19,12 @@ export class RealtyController {
   async createNewRealty(@Body() body: CreateRealtyDto, @Request() req) {
     const user = req.user;
     return this.service.createNewRealty(body, user.id);
+  }
+
+  @Get()
+  async getListOfRealtyForMain() {
+    const list = await this.service.getAll();
+
+    return { list };
   }
 }

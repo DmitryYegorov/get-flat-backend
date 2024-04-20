@@ -27,4 +27,14 @@ export class RealtyService {
 
     return realty;
   }
+
+  async getAll() {
+    const list = await this.prisma.realty.findMany({
+      include: {
+        category: true,
+      },
+    });
+
+    return list;
+  }
 }
