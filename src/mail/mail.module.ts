@@ -10,6 +10,9 @@ console.log({
     pass: process.env.MAIL_PASSWORD,
   });
 
+const path = `${__dirname.split('dist')[0]}/src/mail`;
+
+
 @Module({
   imports: [
     MailerModule.forRootAsync({
@@ -31,7 +34,7 @@ console.log({
           from: `"HOME.GURU" <${process.env.MAIL_USER_NAME}>`,
         },
         template: {
-          dir: join(__dirname, 'templates'),
+          dir: join(path, 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,

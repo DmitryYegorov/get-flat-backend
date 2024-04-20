@@ -63,7 +63,7 @@ export class AuthService {
         {
           email: newUser.email,
           templateId: 'welcome-new-user',
-          subject: 'Welcome to the E-Department!',
+          subject: 'Welcome to the HomeGuru!',
         },
         mailContext,
       )
