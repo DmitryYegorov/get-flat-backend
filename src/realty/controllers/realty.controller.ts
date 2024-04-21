@@ -33,4 +33,9 @@ export class RealtyController {
   async getRealtyById(@Param('id') id: string) {
     return this.service.getById(id);
   }
+
+  @Get('/users/:userId')
+  async getAllRealties(@Param('userId') userId: string) {
+    return this.service.getRealtiesByUser(userId);
+  }
 }

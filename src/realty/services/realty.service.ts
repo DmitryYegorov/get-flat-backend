@@ -48,4 +48,17 @@ export class RealtyService {
       },
     });
   }
+
+  async getRealtiesByUser(userId: string) {
+    const list = await this.prisma.realty.findMany({
+      where: {
+        ownerId: userId,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    return { list };
+  }
 }
