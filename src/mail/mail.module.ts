@@ -5,10 +5,6 @@ import { MailService } from './mail.service';
 import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 
-console.log({
-    user: process.env.MAIL_USER_NAME,
-    pass: process.env.MAIL_PASSWORD,
-  });
 
 const path = `${__dirname.split('dist')[0]}/src/mail`;
 

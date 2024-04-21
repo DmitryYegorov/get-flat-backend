@@ -114,7 +114,7 @@ export class AuthService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
-        secret: JwtSecretAccess
+        secret: JwtSecretAccess,
       }),
       payload,
     };
@@ -136,6 +136,7 @@ export class AuthService {
         middleName: user.middleName,
         lastName: user.lastName,
         fullName: `${user.firstName} ${user.middleName} ${user.lastName}`,
+        ...user,
       },
       authorized: new Date(),
     };

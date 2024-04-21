@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -26,5 +27,10 @@ export class RealtyController {
     const list = await this.service.getAll();
 
     return { list };
+  }
+
+  @Get('/:id')
+  async getRealtyById(@Param('id') id: string) {
+    return this.service.getById(id);
   }
 }

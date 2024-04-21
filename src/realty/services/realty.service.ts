@@ -37,4 +37,15 @@ export class RealtyService {
 
     return list;
   }
+
+  async getById(id: string) {
+    return this.prisma.realty.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        category: true,
+      },
+    });
+  }
 }
