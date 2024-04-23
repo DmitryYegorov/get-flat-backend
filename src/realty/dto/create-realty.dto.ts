@@ -8,4 +8,7 @@ export class CreateRealtyDto {
   price: number;
   title: string;
   description: string;
+  wcCount: number;
+  hasKitchen: boolean;
+  hasParking: boolean;
 }

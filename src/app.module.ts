@@ -3,12 +3,14 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
 import { RealtyModule } from './realty/realty.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
     UsersModule,
     MailModule,
     RealtyModule,
+    BookingModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

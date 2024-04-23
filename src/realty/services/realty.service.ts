@@ -21,12 +21,13 @@ export class RealtyService {
         bathroomCount: data.bathroomCount,
         title: data.title,
         location: data.location,
-        wcCount: 1,
-        hasKitchen: true,
-        hasParking: true,
+        wcCount: data.wcCount,
+        hasKitchen: data.hasKitchen,
+        hasParking: data.hasParking,
         city: '',
         address: '',
         images: [],
+        roomCount: data.roomCount,
       },
     });
 
@@ -52,6 +53,7 @@ export class RealtyService {
       include: {
         category: true,
         favorites: true,
+        bookings: true,
       },
     });
   }

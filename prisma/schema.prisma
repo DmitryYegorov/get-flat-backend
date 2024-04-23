@@ -27,6 +27,7 @@ model User {
   createdAt DateTime?   @default(now()) @db.Timestamptz()
   realties  Realty[]
   favorites Favorites[]
+  bookings  Bookings[]
 }
 
 model Realty {
@@ -49,10 +50,12 @@ model Realty {
   kitchenInfo   String?  @db.VarChar()
   location      Json
   title         String   @db.VarChar()
+  roomCount     Int      @default(1)
 
-  owner     User           @relation(fields: [ownerId], references: [id])
-  category  RealtyCategory @relation(fields: [categoryId], references: [id])
+  owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  category  RealtyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   favorites Favorites[]
+  bookings  Bookings[]
 }
 
 model RealtyCategory {
@@ -69,6 +72,17 @@ model Favorites {
   userId    String    @db.Uuid
   createdAt DateTime? @default(now())
 
-  realty Realty @relation(fields: [realtyId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  realty Realty @relation(fields: [realtyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Bookings {
+  id        String   @id @default(uuid()) @db.Uuid
+  realtyId  String   @db.Uuid
+  userId    String   @db.Uuid
+  startDate DateTime
+  endDate   DateTime
+
+  realty Realty @relation(fields: [realtyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
