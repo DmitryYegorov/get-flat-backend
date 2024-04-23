@@ -24,26 +24,35 @@ model User {
   email_verified_at DateTime? @db.Timestamptz()
   password          String    @db.VarChar(255)
 
-  createdAt DateTime? @default(now()) @db.Timestamptz()
+  createdAt DateTime?   @default(now()) @db.Timestamptz()
   realties  Realty[]
+  favorites Favorites[]
 }
 
 model Realty {
-  id            String  @id @default(uuid()) @db.Uuid
-  categoryId    String  @db.Uuid
-  status        String  @db.VarChar(255)
-  type          String  @db.VarChar(255)
+  id            String   @id @default(uuid()) @db.Uuid
+  categoryId    String   @db.Uuid
+  status        String   @db.VarChar(255)
   description   String?
-  ownerId       String  @db.Uuid
-  mainPhoto     String  @db.VarChar(255)
-  price         Decimal @db.Money
+  ownerId       String   @db.Uuid
+  mainPhoto     String   @db.VarChar(255)
+  price         Decimal  @db.Money
   guestCount    Int
   bathroomCount Int
+  wcCount       Int
+  hasParking    Boolean
+  parkingInfo   String?  @db.VarChar()
+  city          Json
+  address       String
+  images        String[]
+  hasKitchen    Boolean
+  kitchenInfo   String?  @db.VarChar()
   location      Json
-  title         String  @db.VarChar()
+  title         String   @db.VarChar()
 
-  owner    User           @relation(fields: [ownerId], references: [id])
-  category RealtyCategory @relation(fields: [categoryId], references: [id])
+  owner     User           @relation(fields: [ownerId], references: [id])
+  category  RealtyCategory @relation(fields: [categoryId], references: [id])
+  favorites Favorites[]
 }
 
 model RealtyCategory {
@@ -52,4 +61,14 @@ model RealtyCategory {
   icon        String?  @db.VarChar(255)
   description String
   realties    Realty[]
+}
+
+model Favorites {
+  id        String    @id @default(uuid()) @db.Uuid
+  realtyId  String    @db.Uuid
+  userId    String    @db.Uuid
+  createdAt DateTime? @default(now())
+
+  realty Realty @relation(fields: [realtyId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 }

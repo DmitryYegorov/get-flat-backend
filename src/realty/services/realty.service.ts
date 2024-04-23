@@ -13,7 +13,6 @@ export class RealtyService {
       data: {
         categoryId: data.categoryId,
         status: RealtyStatus.DRAFT,
-        type: '',
         description: data.description,
         ownerId: userId,
         mainPhoto: data.imageSrc,
@@ -22,6 +21,12 @@ export class RealtyService {
         bathroomCount: data.bathroomCount,
         title: data.title,
         location: data.location,
+        wcCount: 1,
+        hasKitchen: true,
+        hasParking: true,
+        city: '',
+        address: '',
+        images: [],
       },
     });
 
@@ -32,6 +37,7 @@ export class RealtyService {
     const list = await this.prisma.realty.findMany({
       include: {
         category: true,
+        favorites: true,
       },
     });
 
@@ -45,6 +51,7 @@ export class RealtyService {
       },
       include: {
         category: true,
+        favorites: true,
       },
     });
   }
@@ -60,5 +67,76 @@ export class RealtyService {
     });
 
     return { list };
+  }
+
+  async like(realtyId: string, userId: string) {
+    const found = await this.prisma.favorites.findFirst({
+      where: {
+        realtyId,
+        userId,
+      },
+    });
+
+    if (found) {
+      await this.prisma.favorites.delete({
+        where: {
+          id: found.id,
+        },
+      });
+    } else {
+      await this.prisma.favorites.create({
+        data: {
+          userId,
+          realtyId,
+        },
+      });
+    }
+  }
+
+  async getFavoritesRealties(userId: string) {
+    const list = await this.prisma.favorites.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        realty: {
+          include: {
+            category: true,
+            favorites: true,
+          },
+        },
+      },
+    });
+
+    return {
+      list: list.map((i) => i.realty),
+    };
+  }
+
+  async updateRealtyInfo(id: string, data) {
+    const oldData = await this.prisma.realty.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    // const images = [];
+    // if (data.images) {
+    //   new Set([...data.images, ...oldData.images]).forEach((item) =>
+    //     images.push(item),
+    //   );
+    // }
+
+    const updated = await this.prisma.realty.update({
+      where: {
+        id,
+      },
+      data: {
+        ...data,
+        // images: [...images],
+      },
+    });
+
+    return updated;
   }
 }

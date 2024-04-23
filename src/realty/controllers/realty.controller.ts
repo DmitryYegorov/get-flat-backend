@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -29,13 +30,36 @@ export class RealtyController {
     return { list };
   }
 
+  @Get('/users/:userId')
+  async getAllRealties(@Param('userId') userId: string) {
+    return this.service.getRealtiesByUser(userId);
+  }
+
+  @Post('/like')
+  @UseGuards(AuthGuard)
+  async addOrDeleteFavorites(@Body() body, @Request() req) {
+    const realtyId = body.realtyId;
+    const user = req.user;
+
+    return this.service.like(realtyId, user.id);
+  }
+
+  @Get('/favorites')
+  @UseGuards(AuthGuard)
+  async getFavoritesRealties(@Request() req) {
+    const user = req.user;
+
+    console.log(user.id);
+    return this.service.getFavoritesRealties(user.id);
+  }
+
   @Get('/:id')
   async getRealtyById(@Param('id') id: string) {
     return this.service.getById(id);
   }
 
-  @Get('/users/:userId')
-  async getAllRealties(@Param('userId') userId: string) {
-    return this.service.getRealtiesByUser(userId);
+  @Patch('/:realtyId')
+  async updateRealtyInfo(@Param('realtyId') id: string, @Body() body) {
+    return this.service.updateRealtyInfo(id, body);
   }
 }
