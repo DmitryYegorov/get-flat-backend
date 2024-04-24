@@ -52,10 +52,11 @@ model Realty {
   title         String   @db.VarChar()
   roomCount     Int      @default(1)
 
-  owner     User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  category  RealtyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  favorites Favorites[]
-  bookings  Bookings[]
+  owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  category     RealtyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  favorites    Favorites[]
+  bookings     Bookings[]
+  bookingSlots BookingSlots[]
 }
 
 model RealtyCategory {
@@ -77,12 +78,21 @@ model Favorites {
 }
 
 model Bookings {
-  id        String   @id @default(uuid()) @db.Uuid
-  realtyId  String   @db.Uuid
-  userId    String   @db.Uuid
-  startDate DateTime
-  endDate   DateTime
+  id             String   @id @default(uuid()) @db.Uuid
+  realtyId       String   @db.Uuid
+  userId         String   @db.Uuid
+  startDate      DateTime
+  endDate        DateTime
+  ownerApprooved Boolean? @default(false)
 
   realty Realty @relation(fields: [realtyId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BookingSlots {
+  id       String   @id @default(uuid()) @db.Uuid
+  realtyId String   @db.Uuid
+  date     DateTime
+
+  realty Realty @relation(fields: [realtyId], references: [id], onDelete: Cascade)
 }

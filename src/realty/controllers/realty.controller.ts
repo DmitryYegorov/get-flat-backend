@@ -62,4 +62,9 @@ export class RealtyController {
   async updateRealtyInfo(@Param('realtyId') id: string, @Body() body) {
     return this.service.updateRealtyInfo(id, body);
   }
+
+  @Post('/booking-slot/add')
+  async addSlotsBooking(@Body() body) {
+    return this.service.addBookingSlots(body.realtyId, body.dates);
+  }
 }

@@ -46,7 +46,7 @@ export class RealtyService {
   }
 
   async getById(id: string) {
-    return this.prisma.realty.findUnique({
+    const found = await this.prisma.realty.findUnique({
       where: {
         id,
       },
@@ -54,8 +54,28 @@ export class RealtyService {
         category: true,
         favorites: true,
         bookings: true,
+        bookingSlots: true,
       },
     });
+
+    const slots = found.bookingSlots.map((b) => b.date);
+    const booked = found.bookings.map((b) => [b.startDate, b.endDate]);
+
+    for (const book of booked) {
+      const [start, end] = book;
+
+      slots.forEach((slot, index) => {
+        if (slot >= start && slot <= end) {
+          slots[index] = null;
+        }
+      });
+    }
+
+    return {
+      ...found,
+      slots,
+      booked,
+    };
   }
 
   async getRealtiesByUser(userId: string) {
@@ -65,6 +85,8 @@ export class RealtyService {
       },
       include: {
         category: true,
+        bookings: true,
+        bookingSlots: true,
       },
     });
 
@@ -105,6 +127,7 @@ export class RealtyService {
           include: {
             category: true,
             favorites: true,
+            bookingSlots: true,
           },
         },
       },
@@ -140,5 +163,16 @@ export class RealtyService {
     });
 
     return updated;
+  }
+
+  async addBookingSlots(realtyId: string, dates: Date[]) {
+    const created = await this.prisma.bookingSlots.createMany({
+      data: dates.map((date) => ({
+        realtyId,
+        date,
+      })),
+    });
+
+    return created;
   }
 }

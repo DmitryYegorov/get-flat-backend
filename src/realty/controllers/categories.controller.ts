@@ -15,5 +15,4 @@ export class CategoriesController {
   async getAllCategories() {
     return this.service.getAllCategories();
   }
-
 }
