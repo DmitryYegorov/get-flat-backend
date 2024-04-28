@@ -23,9 +23,9 @@ export class RealtyController {
     return this.service.createNewRealty(body, user.id);
   }
 
-  @Get()
-  async getListOfRealtyForMain() {
-    const list = await this.service.getAll();
+  @Post('/get')
+  async getListOfRealtyForMain(@Body() body) {
+    const list = await this.service.getAll(body);
 
     return { list };
   }

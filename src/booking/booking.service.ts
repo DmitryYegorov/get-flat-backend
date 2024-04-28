@@ -1,18 +1,33 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { connect } from 'http2';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as dayjs from 'dayjs';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) {}
 
   async bookRealty(userId, data) {
+
+    const realtyId = data.realtyId;
+
+    const realty = await this.prisma.realty.findUnique({
+      where: {
+        id: realtyId,
+      }
+    });
+
+    const diff = dayjs(data.endDate).diff(dayjs(data.startDate), 'days') + 1;
+    const total = Number(realty.price) * diff;
+
+    console.log({diff, total});
+
     const booking = await this.prisma.bookings.create({
       data: {
+        ...data,
         userId,
-        realtyId: data.realtyId,
-        startDate: data.startDate,
-        endDate: data.endDate,
+        total: new Prisma.Decimal(total),
       },
     });
 

@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRealtyDto } from '../dto/create-realty.dto';
 import { RealtyStatus } from '../types/relaty-status.enum';
 import { Prisma } from '@prisma/client';
+import { equals } from 'class-validator';
 
 @Injectable()
 export class RealtyService {
@@ -43,12 +44,41 @@ export class RealtyService {
     return realty;
   }
 
-  async getAll() {
+  async getAll(body = null) {
+    console.log(body);
+    let where: any = {};
+
+
+    if (body.location?.label) {
+      where.location = { equals: body.location };
+    }
+
+    if (body.city?.label) {
+      where.location = { equals: body.city };
+    }
+
+    if (body.guestCount != null) {
+      where.guestCount = {
+        gte: body.guestCount,
+      };
+    }
+
+    if (body.childrenCount != null) {
+      where.childrenCount = {
+        gte: body.childrenCount,
+      };
+    }
+
+    if (body.categoryId != null) {
+      where.categoryId = body.categoryId;
+    }
+
     const list = await this.prisma.realty.findMany({
       include: {
         category: true,
         favorites: true,
       },
+      where,
     });
 
     return list;
