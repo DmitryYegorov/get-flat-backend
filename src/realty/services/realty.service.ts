@@ -196,7 +196,21 @@ export class RealtyService {
     }
 
     const categoryId = data.categoryId;
+
+    let updateCategory: any = {
+      category: {
+        connect: {
+          id: categoryId,
+        },
+      }
+    };
+
+    if (categoryId == null) {
+      updateCategory = {};
+    }
+
     delete data.categoryId;
+
 
     const updated = await this.prisma.realty.update({
       where: {
@@ -204,11 +218,7 @@ export class RealtyService {
       },
       data: {
         ...data,
-        category: {
-          connect: {
-            id: categoryId,
-          },
-        },
+        ...updateCategory,
       },
     });
 

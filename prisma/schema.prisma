@@ -105,6 +105,7 @@ model Bookings {
   guestCount    Int       @default(1)
   childrenCount Int       @default(0)
   createdAt     DateTime? @default(now())
+  confirmed     Boolean?  @default(false)
 
   realty   Realty     @relation(fields: [realtyId], references: [id], onDelete: Cascade)
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)

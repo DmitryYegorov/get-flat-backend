@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { connect } from 'http2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as dayjs from 'dayjs';
 import { Prisma } from '@prisma/client';
+
+function generateRandomEightDigitNumber() {
+  // Генерируем число от 10000000 (включительно) до 99999999 (включительно)
+  return Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
+}  
 
 @Injectable()
 export class BookingService {
@@ -11,6 +16,7 @@ export class BookingService {
   async bookRealty(userId, data) {
 
     const realtyId = data.realtyId;
+    const secretCode = generateRandomEightDigitNumber();
 
     const realty = await this.prisma.realty.findUnique({
       where: {
@@ -26,6 +32,7 @@ export class BookingService {
     const booking = await this.prisma.bookings.create({
       data: {
         ...data,
+        secretCode: String(secretCode).padStart(8, '0'),
         userId,
         total: new Prisma.Decimal(total),
       },
@@ -131,6 +138,27 @@ export class BookingService {
       data: {
         isRead: true,
       },
+    });
+  }
+
+  async checkCode(bookingId: string, secretCode: string) {
+    const booking = await this.prisma.bookings.findUnique({
+      where: {
+        id: bookingId,
+      }
+    });
+
+    if (booking.secretCode !== secretCode) {
+      throw new BadRequestException("Неверный код!");
+    }
+
+    return this.prisma.bookings.update({
+      where: {
+        id: bookingId,
+      },
+      data: {
+        confirmed: true,
+      }
     });
   }
 }

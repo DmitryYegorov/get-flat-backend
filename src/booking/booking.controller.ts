@@ -30,6 +30,11 @@ export class BookingContrller {
     return this.service.getBookingsByUser(user.id);
   }
 
+  @Post('/check-code')
+  async confirmCode(@Body() body) {
+    return this.service.checkCode(body.bookingId, body.secretCode);
+  }
+
   @Get('/for-owner')
   @UseGuards(AuthGuard)
   async getOwnerBookings(@Request() req) {
