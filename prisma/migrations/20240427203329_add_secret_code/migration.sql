@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Bookings" ADD COLUMN     "secretCode" VARCHAR(255) NOT NULL DEFAULT '12345678';

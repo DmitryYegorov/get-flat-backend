@@ -1,4 +1,12 @@
-import { Controller, Post, UseGuards, Body, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Body,
+  Request,
+  Get,
+  Param,
+} from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { AuthGuard } from 'src/users/auth/auth.guard';
 
@@ -13,4 +21,34 @@ export class BookingContrller {
 
     return this.service.bookRealty(user.id, body);
   }
+
+  @Get('/my')
+  @UseGuards(AuthGuard)
+  async getUserBookings(@Request() req) {
+    const user = req.user;
+
+    return this.service.getBookingsByUser(user.id);
+  }
+
+  @Get('/for-owner')
+  @UseGuards(AuthGuard)
+  async getOwnerBookings(@Request() req) {
+    const user = req.user;
+
+    return this.service.getBookingsForOwner(user.id);
+  }
+
+  @Get('/:id')
+  async getBookingById(@Param('id') id: string) {
+    return this.service.getBookingById(id);
+  }
+
+  @Get('/:id/chat')
+  @UseGuards(AuthGuard)
+  async getChat(@Request() req, @Param('id') id: string) {
+    const user = req.user;
+
+    return this.service.getBookingChat(user.id, id);
+  }
+
 }

@@ -8,7 +8,7 @@ import { Prisma } from '@prisma/client';
 export class RealtyService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createNewRealty(data: CreateRealtyDto, userId: string) {
+  async createNewRealty(data: any, userId: string) {
     const realty = await this.prisma.realty.create({
       data: {
         categoryId: data.categoryId,
@@ -24,10 +24,19 @@ export class RealtyService {
         wcCount: data.wcCount,
         hasKitchen: data.hasKitchen,
         hasParking: data.hasParking,
-        city: '',
-        address: '',
-        images: [],
+        city: data.city || '',
+        address: data.address || '',
+        images: data.images || [],
         roomCount: data.roomCount,
+        childrenCount: data.childrenCount,
+        bathType: data.bathType,
+        showerCount: data.showerCount,
+        hasPlayground: data.hasPlayground,
+        bathroomIsCombined: data.bathroomIsCombined,
+        isAccessible: data.isAccessible,
+        hasBreakfast: data.hasBreakfast,
+        hasDinner: data.hasDinner,
+        hasLunch: data.hasLunch,
       },
     });
 
@@ -152,13 +161,24 @@ export class RealtyService {
     //   );
     // }
 
+    if (data.price != null) {
+      data.price = new Prisma.Decimal(data.price);
+    }
+
+    const categoryId = data.categoryId;
+    delete data.categoryId;
+
     const updated = await this.prisma.realty.update({
       where: {
         id,
       },
       data: {
         ...data,
-        // images: [...images],
+        category: {
+          connect: {
+            id: categoryId,
+          },
+        },
       },
     });
 

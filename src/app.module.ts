@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { MailModule } from './mail/mail.module';
 import { RealtyModule } from './realty/realty.module';
 import { BookingModule } from './booking/booking.module';
+import { ChatGateway } from './websocket.gateway';
+import { PrismaService } from './prisma/prisma.service';
+import { BookingService } from './booking/booking.service';
 
 @Module({
   imports: [
@@ -16,6 +19,6 @@ import { BookingModule } from './booking/booking.module';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [ChatGateway, PrismaService, BookingService],
 })
 export class AppModule {}

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Bookings" ADD COLUMN     "childrenCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "guestCount" INTEGER NOT NULL DEFAULT 1;
