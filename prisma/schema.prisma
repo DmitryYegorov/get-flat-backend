@@ -29,7 +29,7 @@ model User {
   favorites    Favorites[]
   bookings     Bookings[]
   sentMessages Messages[]  @relation("sentMessages")
-  Reviews      Reviews[]
+  realtyReviews      Reviews[]
 }
 
 model Realty {
@@ -70,7 +70,7 @@ model Realty {
   favorites    Favorites[]
   bookings     Bookings[]
   bookingSlots BookingSlots[]
-  Reviews      Reviews[]
+  reviews      Reviews[]
 }
 
 model RealtyCategory {

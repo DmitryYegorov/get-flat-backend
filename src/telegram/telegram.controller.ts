@@ -16,7 +16,7 @@ export class TelegramController {
 
         const foundUser = await this.service.getUserByTelegram(from.username);
         if (foundUser) {
-            await ctx.reply(`${foundUser.firstName} ${foundUser.middleName} ${foundUser.lastName}, чем могу вам помочь?`, Markup.keyboard([
+            await ctx.reply(`${foundUser.firstName} ${foundUser.middleName} ${foundUser.lastName}, чем могу вам помочь?`, Markup.inlineKeyboard([
                 // 'Мои брони', 'Моя недвижимость',
                 // 'Оставить отзыв', 'Найти жилье',
                 Markup.button.callback('Мои брони', 'my_bookings'),
@@ -37,13 +37,18 @@ export class TelegramController {
         const user = await this.service.getUserByTelegram(from.username);
         const bookings = await this.service.getMyBookingsList(user.id);
 
-        const message = [];
+        const message = [
+            "<b>Ваши брони:</b>\n\n"
+        ];
         bookings.forEach((b, i) => {
             const location: any = b.realty.location;
             console.log({location});
-            message.push(`${i+1}) ${b.realty.title}, ${location?.label!}, ${location?.cityName!} c ${dayjs(b.startDate).format('DD-MM-YYYY')} по ${dayjs(b.endDate).format('DD-MM-YYYY')}\n`);
+            const row = [`<b>${b.realty.title}</b>`, location?.label, location?.cityName, `<i><u>c ${dayjs(b.startDate).format('DD-MM-YYYY')} по ${dayjs(b.endDate).format('DD-MM-YYYY')}</u></i>`, `<b><a href='http://127.0.0.1:3000/my-bookings/${b.id}'>Паспорт бронирования</a></b>`, `\n\n`].filter(s => !!s);
+            message.push(`${i+1})`.concat(row.join(', ')));
         });
 
-        await ctx.reply(message.join(''));
+        console.log(message.join(''))
+
+        await ctx.replyWithHTML(message.join(''));
     }
 }
