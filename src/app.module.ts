@@ -7,6 +7,7 @@ import { BookingModule } from './booking/booking.module';
 import { ChatGateway } from './websocket.gateway';
 import { PrismaService } from './prisma/prisma.service';
 import { BookingService } from './booking/booking.service';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BookingService } from './booking/booking.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TelegramModule,
   ],
   controllers: [],
   providers: [ChatGateway, PrismaService, BookingService],

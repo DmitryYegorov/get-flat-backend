@@ -29,6 +29,7 @@ model User {
   favorites    Favorites[]
   bookings     Bookings[]
   sentMessages Messages[]  @relation("sentMessages")
+  Reviews      Reviews[]
 }
 
 model Realty {
@@ -69,6 +70,7 @@ model Realty {
   favorites    Favorites[]
   bookings     Bookings[]
   bookingSlots BookingSlots[]
+  Reviews      Reviews[]
 }
 
 model RealtyCategory {
@@ -130,4 +132,20 @@ model BookingSlots {
   date     DateTime
 
   realty Realty @relation(fields: [realtyId], references: [id], onDelete: Cascade)
+}
+
+model Reviews {
+  id            String   @id @default(uuid()) @db.Uuid
+  realtyId      String   @db.Uuid
+  rating        Float    @default(0)
+  authorId      String   @db.Uuid
+  text          String?
+  advantages    String?
+  disadvantages String?
+  isAnonymous   Boolean? @default(false)
+  isApprooved   Boolean? @default(false)
+  createdAt     DateTime @default(now())
+
+  realty Realty @relation(fields: [realtyId], references: [id])
+  author User   @relation(fields: [authorId], references: [id])
 }
