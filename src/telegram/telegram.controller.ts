@@ -42,7 +42,6 @@ export class TelegramController {
         ];
         bookings.forEach((b, i) => {
             const location: any = b.realty.location;
-            console.log({location});
             const row = [`<b>${b.realty.title}</b>`, location?.label, location?.cityName, `<i><u>c ${dayjs(b.startDate).format('DD-MM-YYYY')} по ${dayjs(b.endDate).format('DD-MM-YYYY')}</u></i>`, `<b><a href='http://127.0.0.1:3000/my-bookings/${b.id}'>Паспорт бронирования</a></b>`, `\n\n`].filter(s => !!s);
             message.push(`${i+1})`.concat(row.join(', ')));
         });

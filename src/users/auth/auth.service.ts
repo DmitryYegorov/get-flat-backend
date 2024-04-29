@@ -114,7 +114,8 @@ export class AuthService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
-        secret: JwtSecretAccess,
+        secret: JwtSecretAccess,    
+        expiresIn: '24h'  
       }),
       payload,
     };

@@ -24,12 +24,12 @@ model User {
   email_verified_at DateTime? @db.Timestamptz()
   password          String    @db.VarChar(255)
 
-  createdAt    DateTime?   @default(now()) @db.Timestamptz()
-  realties     Realty[]
-  favorites    Favorites[]
-  bookings     Bookings[]
-  sentMessages Messages[]  @relation("sentMessages")
-  realtyReviews      Reviews[]
+  createdAt     DateTime?   @default(now()) @db.Timestamptz()
+  realties      Realty[]
+  favorites     Favorites[]
+  bookings      Bookings[]
+  sentMessages  Messages[]  @relation("sentMessages")
+  realtyReviews Reviews[]
 }
 
 model Realty {
@@ -64,6 +64,7 @@ model Realty {
   hasLunch           Boolean? @default(false)
   phoneNumber        String   @default("123456789")
   email              String   @default("contatc@home.guru.io")
+  withAnimals        Boolean? @default(false)
 
   owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   category     RealtyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -99,9 +100,9 @@ model Bookings {
   userId        String    @db.Uuid
   startDate     DateTime
   endDate       DateTime
-  documentType  String    @default("") @db.VarChar(255)
-  documentId    String    @default("") @db.VarChar(255)
   guestName     String    @default("") @db.VarChar(255)
+  guestPhone    String?    @default("") @db.VarChar()
+  guestEmail    String?    @default("") @db.VarChar()
   comment       String?
   total         Decimal   @default(0)
   guestCount    Int       @default(1)
@@ -144,6 +145,7 @@ model Reviews {
   disadvantages String?
   isAnonymous   Boolean? @default(false)
   isApprooved   Boolean? @default(false)
+  additions     String?
   createdAt     DateTime @default(now())
 
   realty Realty @relation(fields: [realtyId], references: [id])
