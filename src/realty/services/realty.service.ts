@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRealtyDto } from '../dto/create-realty.dto';
 import { RealtyStatus } from '../types/relaty-status.enum';
 import { Prisma } from '@prisma/client';
-import { equals } from 'class-validator';
 
 @Injectable()
 export class RealtyService {
@@ -77,11 +76,31 @@ export class RealtyService {
       include: {
         category: true,
         favorites: true,
+        bookings: {
+          include: {
+            reviews: true,
+          }
+        },
       },
       where,
     });
 
-    return list;
+    return list.map((item) => {
+
+      let reviewsCount = 0;
+      let sum = 0;
+
+      item.bookings.forEach(b => {
+        
+        reviewsCount += b.reviews?.length;
+        sum += b?.reviews.reduce((acc, value) => acc + value.rating, 0);
+      })
+
+      return {
+        ...item,
+        rating: +((sum / reviewsCount).toFixed(2)),
+      }
+    });
   }
 
   async getById(id: string) {
@@ -92,13 +111,29 @@ export class RealtyService {
       include: {
         category: true,
         favorites: true,
-        bookings: true,
+        bookings: {
+          include: {
+            reviews: {
+              include: {
+                author: true,
+              }
+            },
+          }
+        },
         bookingSlots: true,
       },
     });
 
+    const reviews = [];
+
     const slots = found.bookingSlots.map((b) => b.date);
     const booked = found.bookings.map((b) => [b.startDate, b.endDate]);
+
+    const bookings = found.bookings;
+
+    for (const booking of bookings) {
+      reviews.push(...booking?.reviews);
+    }
 
     for (const book of booked) {
       const [start, end] = book;
@@ -110,8 +145,18 @@ export class RealtyService {
       });
     }
 
+    let count  =0;
+    let sum  =0;
+
+    for (const r of reviews) {
+      count++;
+      sum += r.rating;
+    }
+
     return {
       ...found,
+      reviews,
+      rating: +((sum / count).toFixed(2)),
       slots,
       booked,
     };
@@ -124,12 +169,29 @@ export class RealtyService {
       },
       include: {
         category: true,
-        bookings: true,
+        bookings: {
+          include: {
+            reviews: true,
+          }
+        },
         bookingSlots: true,
       },
     });
 
-    return { list };
+    let reviewsCount = 0;
+    let sum = 0;
+
+    for (const item of list) {
+      item.bookings.forEach(b => {
+        reviewsCount += b.reviews?.length;
+        sum += b?.reviews.reduce((acc, value) => acc + value.rating, 0);
+      })
+    }
+
+    return { list: list.map(i => ({
+      ...i,
+      rating: +((sum / reviewsCount).toFixed(2)),
+    })) };
   }
 
   async like(realtyId: string, userId: string) {

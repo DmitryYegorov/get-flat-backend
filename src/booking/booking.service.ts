@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { connect } from 'http2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as dayjs from 'dayjs';
 import { Prisma } from '@prisma/client';
@@ -68,6 +67,7 @@ export class BookingService {
             owner: true,
           },
         },
+        reviews: true
       },
     });
 
@@ -75,7 +75,32 @@ export class BookingService {
       throw new NotFoundException('Бронь не найдена');
     }
 
-    return booking;
+
+    const getTripStatus = (start: Date, end: Date) => {
+      const now = new Date();
+      console.log({start, end, now}, end < now)
+      if (end > now && booking.confirmed) {
+        return {
+          label: 'В процессе',
+          value: 'in_progress',
+        };
+      } else if (end > now && !booking.confirmed) {
+        return {
+          label: 'Не состоялась',
+          value: 'canceled'
+        };
+      }
+      
+      return {
+        label: 'Закончена',
+        value: 'completed'
+      };
+    }
+
+    return {
+      ...booking,
+      tripStatus: getTripStatus(new Date(booking.startDate), new Date(booking.endDate))
+    };
   }
 
   async getBookingChat(userId: string, bookingId: string) {
@@ -160,5 +185,56 @@ export class BookingService {
         confirmed: true,
       }
     });
+  }
+
+  async getTripsByUser(userId: string) {
+    const trips = await this.prisma.bookings.findMany({
+      where: {
+        userId,
+        confirmed: true,
+      },
+      orderBy: {
+        endDate: 'asc',
+      },
+
+    });
+
+    const getTripStatus = (start, end) => {
+      const now = new Date();
+      console.log(start, end, now)
+      if (end < now) {
+        return {
+          label: 'В процессе',
+          value: 'in_progress',
+        };
+      }
+      
+      return {
+        label: 'Закончена',
+        value: 'completed'
+      };
+    }
+
+    return trips.map((t) => ({
+      ...t,
+      tripStatus: getTripStatus(new Date(t.startDate), new Date(t.endDate)),
+    }));
+  }
+
+  async addReview(bookingId: string, userId: string, data) {
+    console.log({
+      bookingId,
+      userId,
+      data
+    })
+    const review = await this.prisma.reviews.create({
+      data: {
+        ...data,
+        authorId: userId,
+        bookingId,
+      }
+    });
+
+    return review;
   }
 }

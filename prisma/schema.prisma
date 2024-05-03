@@ -101,8 +101,8 @@ model Bookings {
   startDate     DateTime
   endDate       DateTime
   guestName     String    @default("") @db.VarChar(255)
-  guestPhone    String?    @default("") @db.VarChar()
-  guestEmail    String?    @default("") @db.VarChar()
+  guestPhone    String?   @default("") @db.VarChar()
+  guestEmail    String?   @default("") @db.VarChar()
   comment       String?
   total         Decimal   @default(0)
   guestCount    Int       @default(1)
@@ -113,6 +113,7 @@ model Bookings {
   realty   Realty     @relation(fields: [realtyId], references: [id], onDelete: Cascade)
   user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   Messages Messages[]
+  reviews  Reviews[]
 }
 
 model Messages {
@@ -137,7 +138,7 @@ model BookingSlots {
 
 model Reviews {
   id            String   @id @default(uuid()) @db.Uuid
-  realtyId      String   @db.Uuid
+  bookingId     String   @db.Uuid
   rating        Float    @default(0)
   authorId      String   @db.Uuid
   text          String?
@@ -148,6 +149,8 @@ model Reviews {
   additions     String?
   createdAt     DateTime @default(now())
 
-  realty Realty @relation(fields: [realtyId], references: [id])
-  author User   @relation(fields: [authorId], references: [id])
+  booking  Bookings @relation(fields: [bookingId], references: [id])
+  author   User     @relation(fields: [authorId], references: [id])
+  Realty   Realty?  @relation(fields: [realtyId], references: [id])
+  realtyId String?  @db.Uuid
 }

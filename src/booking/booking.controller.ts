@@ -30,6 +30,14 @@ export class BookingContrller {
     return this.service.getBookingsByUser(user.id);
   }
 
+  @Get('/trips')
+  @UseGuards(AuthGuard)
+  async getUserTrips(@Request() req) {
+    const user = req.user;
+
+    return this.service.getTripsByUser(user.id);
+  }
+
   @Post('/check-code')
   async confirmCode(@Body() body) {
     return this.service.checkCode(body.bookingId, body.secretCode);
@@ -54,6 +62,18 @@ export class BookingContrller {
     const user = req.user;
 
     return this.service.getBookingChat(user.id, id);
+  }
+
+  @Post('/:id/review/create')
+  @UseGuards(AuthGuard)
+  async createReview(@Request() req, @Body() body, @Param('id') bookingId: string) {
+    const user = req.user;
+    console.log({
+      bookingId,
+      userId: user.id
+    });
+
+    return this.service.addReview(bookingId, user.id, body);
   }
 
 }
