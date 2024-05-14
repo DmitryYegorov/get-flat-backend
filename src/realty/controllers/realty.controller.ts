@@ -11,6 +11,7 @@ import {
 import { CreateRealtyDto } from '../dto/create-realty.dto';
 import { RealtyService } from '../services/realty.service';
 import { AuthGuard } from 'src/users/auth/auth.guard';
+import {RealtyStatus} from 'src/common/enum';
 
 @Controller('/realty')
 export class RealtyController {
@@ -61,6 +62,11 @@ export class RealtyController {
   @Patch('/:realtyId')
   async updateRealtyInfo(@Param('realtyId') id: string, @Body() body) {
     return this.service.updateRealtyInfo(id, body);
+  }
+
+  @Patch('/:realtyId/moderation')
+  async sendToModeration(@Param('realtyId') realtyId: string) {
+	return this.service.updateRealtyInfo(realtyId, {status: RealtyStatus.MODERATION})
   }
 
   @Post('/booking-slot/add')

@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRealtyDto } from '../dto/create-realty.dto';
 import { RealtyStatus } from '../types/relaty-status.enum';
 import { Prisma } from '@prisma/client';
+import {ReviewStatus} from 'src/common/enum';
 
 @Injectable()
 export class RealtyService {
@@ -44,7 +45,6 @@ export class RealtyService {
   }
 
   async getAll(body = null) {
-    console.log(body);
     let where: any = {};
 
 
@@ -93,7 +93,9 @@ export class RealtyService {
       item.bookings.forEach(b => {
         
         reviewsCount += b.reviews?.length;
-        sum += b?.reviews.reduce((acc, value) => acc + value.rating, 0);
+        sum += b?.reviews
+			.filter(r => r.status === ReviewStatus.APPROOVED)
+			.reduce((acc, value) => acc + value.rating, 0);
       })
 
       return {
@@ -132,7 +134,7 @@ export class RealtyService {
     const bookings = found.bookings;
 
     for (const booking of bookings) {
-      reviews.push(...booking?.reviews);
+      reviews.push(...booking?.reviews.filter(r => r.status === ReviewStatus.APPROOVED));
     }
 
     for (const book of booked) {
@@ -184,7 +186,9 @@ export class RealtyService {
     for (const item of list) {
       item.bookings.forEach(b => {
         reviewsCount += b.reviews?.length;
-        sum += b?.reviews.reduce((acc, value) => acc + value.rating, 0);
+        sum += b?.reviews
+			.filter(r => r.status === ReviewStatus.APPROOVED)
+			.reduce((acc, value) => acc + value.rating, 0);
       })
     }
 

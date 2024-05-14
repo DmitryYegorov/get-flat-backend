@@ -13,6 +13,11 @@ datasource db {
 model User {
   id String @id @default(uuid()) @db.Uuid
 
+  status String @db.VarChar(255) @default("CREATED")
+  blockNotes String?
+
+  avatar String? @db.VarChar(255)
+
   firstName  String  @db.VarChar(255)
   middleName String? @db.VarChar(255)
   lastName   String  @db.VarChar(255)
@@ -33,38 +38,40 @@ model User {
 }
 
 model Realty {
-  id                 String   @id @default(uuid()) @db.Uuid
-  categoryId         String   @db.Uuid
-  status             String   @db.VarChar(255)
+  id                 String    @id @default(uuid()) @db.Uuid
+  categoryId         String    @db.Uuid
+  status             String    @db.VarChar(255)
+  rejectionNotes     String?
   description        String?
-  ownerId            String   @db.Uuid
-  mainPhoto          String   @db.VarChar(255)
-  price              Decimal  @db.Money
+  ownerId            String    @db.Uuid
+  mainPhoto          String    @db.VarChar(255)
+  price              Decimal   @db.Money
   guestCount         Int
   bathroomCount      Int
   wcCount            Int
   hasParking         Boolean
-  parkingInfo        String?  @db.VarChar()
+  parkingInfo        String?   @db.VarChar()
   city               Json
   address            String
   images             String[]
   hasKitchen         Boolean
-  kitchenInfo        String?  @db.VarChar()
+  kitchenInfo        String?   @db.VarChar()
   location           Json
-  title              String   @db.VarChar()
-  roomCount          Int      @default(1)
-  childrenCount      Int?     @default(0)
-  bathType           String?  @default("bath") @db.VarChar(255)
-  showerCount        Int?     @default(0)
-  hasPlayground      Boolean? @default(false)
-  bathroomIsCombined Boolean? @default(false)
-  isAccessible       Boolean? @default(false)
-  hasBreakfast       Boolean? @default(false)
-  hasDinner          Boolean? @default(false)
-  hasLunch           Boolean? @default(false)
-  phoneNumber        String   @default("123456789")
-  email              String   @default("contatc@home.guru.io")
-  withAnimals        Boolean? @default(false)
+  title              String    @db.VarChar()
+  roomCount          Int       @default(1)
+  childrenCount      Int?      @default(0)
+  bathType           String?   @default("bath") @db.VarChar(255)
+  showerCount        Int?      @default(0)
+  hasPlayground      Boolean?  @default(false)
+  bathroomIsCombined Boolean?  @default(false)
+  isAccessible       Boolean?  @default(false)
+  hasBreakfast       Boolean?  @default(false)
+  hasDinner          Boolean?  @default(false)
+  hasLunch           Boolean?  @default(false)
+  phoneNumber        String    @default("123456789")
+  email              String    @default("contatc@home.guru.io")
+  withAnimals        Boolean?  @default(false)
+  createdAt          DateTime? @default(now())
 
   owner        User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   category     RealtyCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -138,6 +145,8 @@ model BookingSlots {
 
 model Reviews {
   id            String   @id @default(uuid()) @db.Uuid
+  status        String   @default("CREATED") @db.VarChar()
+  rejectNotes   String?
   bookingId     String   @db.Uuid
   rating        Float    @default(0)
   authorId      String   @db.Uuid
@@ -145,7 +154,6 @@ model Reviews {
   advantages    String?
   disadvantages String?
   isAnonymous   Boolean? @default(false)
-  isApprooved   Boolean? @default(false)
   additions     String?
   createdAt     DateTime @default(now())
 

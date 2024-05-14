@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -14,6 +15,7 @@ import { JwtSecretAccess, salt } from './contants/jwt';
 import { WelcomeNewUserContext } from 'src/mail/types/context/welcome-new-user.context';
 import { MailService } from '../../mail/mail.service';
 import { UserRole } from '../enum/user-role.enum';
+import {UserStatus} from 'src/common/enum';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +37,7 @@ export class AuthService {
 
     if (foundUser) {
       throw new HttpException(
-        'Такой пользователь существует. Используйте логин и пароль для авторизации',
+        'Такой пользователь существует',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -87,6 +89,12 @@ export class AuthService {
         email,
       },
     });
+
+	console.log(foundUser)
+
+	if (foundUser.status === UserStatus.BLOCKED) {
+		throw new UnauthorizedException("Ваш аккаунт был заблокирован модератором. Обратитесь в поддержку");
+	}
 
     const passwordMatches = await bcrypt.compare(
       password,

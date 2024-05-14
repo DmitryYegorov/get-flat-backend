@@ -44,6 +44,9 @@ export class BookingService {
     const bookings = await this.prisma.bookings.findMany({
       where: {
         userId,
+		startDate: {
+			gte: new Date(),
+		}
       },
       include: {
         realty: true,
@@ -65,6 +68,7 @@ export class BookingService {
         realty: {
           include: {
             owner: true,
+			category: true,
           },
         },
         reviews: true

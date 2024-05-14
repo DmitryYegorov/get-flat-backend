@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "blockNotes" TEXT,
+ADD COLUMN     "status" VARCHAR(255) NOT NULL DEFAULT 'CREATED';

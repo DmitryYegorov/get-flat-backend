@@ -12,7 +12,7 @@ export class UsersService {
   }
 
   async updateUserData(id: string, body) {
-    const { firstName, middleName, lastName, email, telegram } = body;
+    const { firstName, middleName, lastName, email, telegram, avatar } = body;
 
     const updated = await this.prisma.user.update({
       where: {
@@ -24,6 +24,7 @@ export class UsersService {
         lastName,
         email,
         telegram,
+		avatar,
       },
     });
 

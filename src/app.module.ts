@@ -8,6 +8,7 @@ import { ChatGateway } from './websocket.gateway';
 import { PrismaService } from './prisma/prisma.service';
 import { BookingService } from './booking/booking.service';
 import { TelegramModule } from './telegram/telegram.module';
+import {ReviewModule} from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TelegramModule } from './telegram/telegram.module';
       isGlobal: true,
     }),
     TelegramModule,
+	ReviewModule,
   ],
   controllers: [],
   providers: [ChatGateway, PrismaService, BookingService],

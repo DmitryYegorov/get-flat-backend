@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { BookingService } from "src/booking/booking.service";
 import { PrismaService } from "src/prisma/prisma.service";
-
 @Injectable()
 export class TelegramService {
     constructor(private readonly prisma: PrismaService, private readonly bookingsService: BookingService) {}
@@ -25,4 +24,10 @@ export class TelegramService {
 
         return bookings;
     }
+
+	async getBookingById(bookingId: string) {
+		const booking = await this.bookingsService.getBookingById(bookingId);
+
+		return booking;
+	}
 }
