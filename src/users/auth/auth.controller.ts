@@ -1,4 +1,4 @@
-import { Body, Post, Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Body, Post, Controller, Get, UseGuards, Request, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -31,5 +31,10 @@ export class AuthController {
     return {
       payload: user,
     };
+  }
+
+  @Get('/confirm-email/:id')
+  async confirmEmail(@Param('id') id) {
+    return this.service.confirmEmail(id);
   }
 }

@@ -1,32 +1,41 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as dayjs from 'dayjs';
 import { Prisma } from '@prisma/client';
+import { MailService } from 'src/mail/mail.service';
+import { TelegramService } from 'src/telegram/telegram.services';
+import { Markup } from 'telegraf';
 
 function generateRandomEightDigitNumber() {
   // Генерируем число от 10000000 (включительно) до 99999999 (включительно)
   return Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
-}  
+}
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+    private readonly telegramService: TelegramService,
+  ) {}
 
   async bookRealty(userId, data) {
-
     const realtyId = data.realtyId;
     const secretCode = generateRandomEightDigitNumber();
 
     const realty = await this.prisma.realty.findUnique({
       where: {
         id: realtyId,
-      }
+      },
     });
 
     const diff = dayjs(data.endDate).diff(dayjs(data.startDate), 'days') + 1;
     const total = Number(realty.price) * diff;
-
-    console.log({diff, total});
 
     const booking = await this.prisma.bookings.create({
       data: {
@@ -35,7 +44,36 @@ export class BookingService {
         userId,
         total: new Prisma.Decimal(total),
       },
+      include: {
+        realty: true,
+        user: true,
+      },
     });
+
+    const mailContext = {
+      fullName: booking.guestName,
+      startDate: dayjs(booking.startDate).format('DD-MM-YYYY'),
+      endDate: dayjs(booking.endDate).format('DD-MM-YYYY'),
+      realtyName: booking.realty.title,
+      realtyCity: booking.realty.city,
+      price: Number(booking.total).toFixed(2),
+      code: booking.secretCode,
+    };
+    await this.mailService.sendMail(
+      {
+        email: booking.guestEmail,
+        templateId: 'book-new-realty',
+        subject: 'Бронирование',
+      },
+      mailContext,
+    );
+
+    if (booking.user?.chatId) {
+      await this.telegramService.sendMessageToChat(
+        booking.user.chatId,
+        `Вы только что забронировали <b>${mailContext.realtyName}</b> на период <i>${mailContext.startDate} - ${mailContext.endDate}</i>.\nПолная стоимость проживания составляет <b>$${mailContext.price}</b>\n\n Приятного отдыха, команда <b>HomeGuru</b>!`,
+      );
+    }
 
     return booking;
   }
@@ -44,9 +82,12 @@ export class BookingService {
     const bookings = await this.prisma.bookings.findMany({
       where: {
         userId,
-		startDate: {
-			gte: new Date(),
-		}
+        startDate: {
+          gte: new Date(),
+        },
+        confirmed: {
+          not: true,
+        },
       },
       include: {
         realty: true,
@@ -68,10 +109,9 @@ export class BookingService {
         realty: {
           include: {
             owner: true,
-			category: true,
           },
         },
-        reviews: true
+        reviews: true,
       },
     });
 
@@ -79,10 +119,8 @@ export class BookingService {
       throw new NotFoundException('Бронь не найдена');
     }
 
-
     const getTripStatus = (start: Date, end: Date) => {
       const now = new Date();
-      console.log({start, end, now}, end < now)
       if (end > now && booking.confirmed) {
         return {
           label: 'В процессе',
@@ -91,19 +129,22 @@ export class BookingService {
       } else if (end > now && !booking.confirmed) {
         return {
           label: 'Не состоялась',
-          value: 'canceled'
+          value: 'canceled',
         };
       }
-      
+
       return {
         label: 'Закончена',
-        value: 'completed'
+        value: 'completed',
       };
-    }
+    };
 
     return {
       ...booking,
-      tripStatus: getTripStatus(new Date(booking.startDate), new Date(booking.endDate))
+      tripStatus: getTripStatus(
+        new Date(booking.startDate),
+        new Date(booking.endDate),
+      ),
     };
   }
 
@@ -174,21 +215,45 @@ export class BookingService {
     const booking = await this.prisma.bookings.findUnique({
       where: {
         id: bookingId,
-      }
+      },
+      include: {
+        user: true,
+        realty: true,
+      },
     });
 
     if (booking.secretCode !== secretCode) {
-      throw new BadRequestException("Неверный код!");
+      throw new BadRequestException('Неверный код!');
     }
 
-    return this.prisma.bookings.update({
+    const result = await this.prisma.bookings.update({
       where: {
         id: bookingId,
       },
       data: {
         confirmed: true,
-      }
+      },
     });
+
+    const chatId = booking.user?.chatId;
+    if (chatId) {
+      await this.telegramService.sendMessageToChat(
+        chatId,
+        `${booking.guestName}, видим, что Вы успешно подтвердили вашу бронь!\n
+			Команда <b>HomeGuru</b> жедает Вам приятного отдыха и только положительных впечатлений от нашего сервиса и владельца недвижимостью!\n\n
+			Кстати о впечатлениях, оставьте пожалуйста свой отзыв <a href="http://127.0.0.1:3000/my-trips/${result.id}">тут</a> о вашем опыте прожимания в "${booking.realty.title}", это поможет соориентироваться с выбором места отдыха для наших пользователей.`,
+        Markup.inlineKeyboard([
+          [
+            Markup.button.url(
+              'Оставить отзыв',
+              `http://127.0.0.1:3000/my-trips/${result.id}`,
+            ),
+          ],
+        ]),
+      );
+    }
+
+    return result;
   }
 
   async getTripsByUser(userId: string) {
@@ -200,24 +265,23 @@ export class BookingService {
       orderBy: {
         endDate: 'asc',
       },
-
     });
 
     const getTripStatus = (start, end) => {
       const now = new Date();
-      console.log(start, end, now)
+      console.log(start, end, now);
       if (end < now) {
         return {
           label: 'В процессе',
           value: 'in_progress',
         };
       }
-      
+
       return {
         label: 'Закончена',
-        value: 'completed'
+        value: 'completed',
       };
-    }
+    };
 
     return trips.map((t) => ({
       ...t,
@@ -229,14 +293,14 @@ export class BookingService {
     console.log({
       bookingId,
       userId,
-      data
-    })
+      data,
+    });
     const review = await this.prisma.reviews.create({
       data: {
         ...data,
         authorId: userId,
         bookingId,
-      }
+      },
     });
 
     return review;

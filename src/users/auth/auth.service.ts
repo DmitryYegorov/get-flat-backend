@@ -1,5 +1,5 @@
 import {
-	BadRequestException,
+  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -15,7 +15,7 @@ import { JwtSecretAccess, salt } from './contants/jwt';
 import { WelcomeNewUserContext } from 'src/mail/types/context/welcome-new-user.context';
 import { MailService } from '../../mail/mail.service';
 import { UserRole } from '../enum/user-role.enum';
-import {UserStatus} from 'src/common/enum';
+import { UserStatus } from 'src/common/enum';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +24,17 @@ export class AuthService {
     private jwtService: JwtService,
     private mailService: MailService,
   ) {}
+
+  async confirmEmail(userId: string) {
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        email_verified_at: new Date(),
+      },
+    });
+  }
 
   async register(input: RegisterDto) {
     const { email, password, firstName, lastName, middleName, telegram } =
@@ -71,7 +82,7 @@ export class AuthService {
       )
       .catch(async (err) => {
         await this.prisma.user.delete({ where: { id: newUser.id } });
-        console.log({err});
+        console.log({ err });
         throw new HttpException(
           'Прозошла ошибка на сервере при проверке Вашей электронной почты. попробуйте позже',
           HttpStatus.INTERNAL_SERVER_ERROR,
@@ -90,11 +101,11 @@ export class AuthService {
       },
     });
 
-	console.log(foundUser)
-
-	if (foundUser.status === UserStatus.BLOCKED) {
-		throw new UnauthorizedException("Ваш аккаунт был заблокирован модератором. Обратитесь в поддержку");
-	}
+    if (foundUser.status === UserStatus.BLOCKED) {
+      throw new UnauthorizedException(
+        'Ваш аккаунт был заблокирован модератором. Обратитесь в поддержку',
+      );
+    }
 
     const passwordMatches = await bcrypt.compare(
       password,
@@ -122,8 +133,8 @@ export class AuthService {
 
     return {
       accessToken: await this.jwtService.signAsync(payload, {
-        secret: JwtSecretAccess,    
-        expiresIn: '24h'  
+        secret: JwtSecretAccess,
+        expiresIn: '24h',
       }),
       payload,
     };
